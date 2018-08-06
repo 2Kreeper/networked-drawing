@@ -15,21 +15,25 @@ public abstract class Shape {
     protected Color color;
     protected JSONObject json;
 
+    protected Point size;
     protected boolean filled, selected;
 
     public Shape(JSONObject raw) {
         JSONObject posObj = raw.getJSONObject("position");
         JSONObject colorObj = raw.getJSONObject("color");
+        JSONObject sizeObj = raw.getJSONObject("size");
 
         pos = new Point(posObj.getInt("x"), posObj.getInt("y"));
         color = new Color(colorObj.getInt("r"), colorObj.getInt("g"), colorObj.getInt("b"));
+        size = new Point(sizeObj.getInt("width"), sizeObj.getInt("height"));
         filled = raw.getBoolean("filled");
     }
 
-    public Shape(Point pos, Color color, boolean filled) {
+    public Shape(Point pos, Color color, boolean filled, int width, int height) {
         this.pos = pos;
         this.color = color;
         this.filled = filled;
+        this.size = new Point(width, height);
     }
 
     protected void jsonSetup() {
@@ -37,6 +41,7 @@ public abstract class Shape {
 
         json.put("position", getPositionJson());
         json.put("color", getColorJson());
+        json.put("size", getSizeJson());
         json.put("filled", filled);
     }
 
@@ -47,7 +52,6 @@ public abstract class Shape {
 
         return posJson;
     }
-
     private JSONObject getColorJson() {
         JSONObject colorJson = new JSONObject();
         colorJson.put("r", color.getRed());
@@ -55,6 +59,14 @@ public abstract class Shape {
         colorJson.put("b", color.getBlue());
 
         return colorJson;
+    }
+    private JSONObject getSizeJson() {
+        JSONObject sizeJson = new JSONObject();
+
+        sizeJson.put("width", size.x);
+        sizeJson.put("height", size.y);
+
+        return sizeJson;
     }
 
     public Point getPos() {
@@ -69,7 +81,14 @@ public abstract class Shape {
     public boolean isSelected() {
         return selected;
     }
+    public Point getSize() {
+        return size;
+    }
 
+    public void setSize(Point size) {
+        this.size = size;
+        json.put("size", getSizeJson());
+    }
     public void setPos(Point pos) {
         this.pos = pos;
 

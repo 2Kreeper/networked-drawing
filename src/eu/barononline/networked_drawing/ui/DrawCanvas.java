@@ -1,12 +1,13 @@
 package eu.barononline.networked_drawing.ui;
 
+import com.sun.istack.internal.NotNull;
 import eu.barononline.network_classes.NetworkCommand;
 import eu.barononline.network_classes.interfaces.IReceiver;
 import eu.barononline.networked_drawing.networking.CommandType;
 import eu.barononline.networked_drawing.networking.Headers;
 import eu.barononline.networked_drawing.networking.IDrawReceiver;
 import eu.barononline.networked_drawing.ui.interaction.UserInteractionHandler;
-import eu.barononline.networked_drawing.ui.shapes.Circle;
+import eu.barononline.networked_drawing.ui.shapes.Oval;
 import eu.barononline.networked_drawing.ui.shapes.Rectangle;
 import eu.barononline.networked_drawing.ui.shapes.Shape;
 import eu.barononline.networked_drawing.ui.shapes.Shapes;
@@ -20,6 +21,7 @@ import java.util.ArrayList;
 public class DrawCanvas extends JPanel implements IDrawReceiver, IReceiver<NetworkCommand<CommandType>> {
 
     private ArrayList<Shape> shapes = new ArrayList<>();
+    private ArrayList<Shape> previewShapes = new ArrayList<>();
     private Queue<Shape> undones = new Queue<>();
     private UserInteractionHandler handler;
     private DrawFrame frame;
@@ -40,9 +42,13 @@ public class DrawCanvas extends JPanel implements IDrawReceiver, IReceiver<Netwo
         for(Shape shape : shapes) {
             shape.draw(g2);
         }
+
+        for(Shape shape : previewShapes) {
+            shape.draw(g2);
+        }
     }
 
-    public Shape getShape(Point pos) {
+    public Shape getShape(@NotNull Point pos) {
         Shape result = null;
 
         for(Shape shape : shapes) {
@@ -54,7 +60,19 @@ public class DrawCanvas extends JPanel implements IDrawReceiver, IReceiver<Netwo
         return result;
     }
 
-    public void add(Shape s, boolean overNetwork) {
+    public void addPreview(@NotNull Shape s) {
+        shapes.add(s);
+
+        repaint();
+    }
+
+    public void removePreview(@NotNull Shape s) {
+        previewShapes.remove(s);
+
+        repaint();
+    }
+
+    public void add(@NotNull Shape s, boolean overNetwork) {
         shapes.add(s);
 
         if(overNetwork) {
@@ -69,7 +87,7 @@ public class DrawCanvas extends JPanel implements IDrawReceiver, IReceiver<Netwo
     }
 
     @Override
-    public void onDraw(NetworkCommand<CommandType> cmd) {
+    public void onDraw(@NotNull NetworkCommand<CommandType> cmd) {
         if(!cmd.containsHeader(Headers.DRAW_SHAPE)) {
             System.err.println("Draw Shape not specified in Draw command!");
             return;
@@ -78,8 +96,8 @@ public class DrawCanvas extends JPanel implements IDrawReceiver, IReceiver<Netwo
         JSONObject body = new JSONObject(cmd.getBody());
 
         switch(cmd.getHeader(Headers.DRAW_SHAPE)) {
-            case Shapes.CIRCLE:
-                add(new Circle(body), true);
+            case Shapes.OVAL:
+                add(new Oval(body), true);
                 break;
             case Shapes.RECTANGLE:
                 add(new Rectangle(body), true);
@@ -88,7 +106,7 @@ public class DrawCanvas extends JPanel implements IDrawReceiver, IReceiver<Netwo
     }
 
     @Override
-    public void onReceive(NetworkCommand<CommandType> sent) {
+    public void onReceive(@NotNull NetworkCommand<CommandType> sent) {
         switch(sent.getCommandType()) {
             case Undo:
                 Shape undone = shapes.remove(shapes.size() - 1);
@@ -106,7 +124,7 @@ public class DrawCanvas extends JPanel implements IDrawReceiver, IReceiver<Netwo
         repaint();
     }
 
-    private void clear(Graphics2D g2) {
+    private void clear(@NotNull Graphics2D g2) {
         g2.setColor(getBackground());
         g2.clearRect(0, 0, getWidth(), getHeight());
     }

@@ -40,8 +40,8 @@ public class DrawFrame extends JFrame {
         toolBar = new JToolBar("Toolbar");
         ButtonGroup shapeGroup = new ButtonGroup();
 
-        JToggleButton circleOption = new JToggleButton("Circle");
-        circleOption.addActionListener((e) -> canvas.getHandler().setShape(Shapes.CIRCLE));
+        JToggleButton circleOption = new JToggleButton("Oval");
+        circleOption.addActionListener((e) -> canvas.getHandler().setShape(Shapes.OVAL));
         circleOption.doClick();
         shapeGroup.add(circleOption);
         toolBar.add(circleOption);
