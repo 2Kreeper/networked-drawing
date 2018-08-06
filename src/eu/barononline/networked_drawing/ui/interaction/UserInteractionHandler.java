@@ -7,14 +7,12 @@ import eu.barononline.networked_drawing.ui.shapes.Shape;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
-import java.awt.event.MouseMotionListener;
+import java.awt.event.*;
 
 import static eu.barononline.networked_drawing.ui.shapes.Shapes.OVAL;
 import static eu.barononline.networked_drawing.ui.shapes.Shapes.RECTANGLE;
 
-public class UserInteractionHandler implements MouseListener, MouseMotionListener {
+public class UserInteractionHandler implements MouseListener, MouseMotionListener, KeyListener {
 
     private DrawCanvas canvas;
     private String shapeType;
@@ -33,12 +31,8 @@ public class UserInteractionHandler implements MouseListener, MouseMotionListene
         this.shapeType = shape;
     }
 
-    private void tryCreateShape(Point p) {
-        Shape s = makeShape(p, 50, 50);
+    public void onDeletePressed() {
 
-        if(s != null) {
-            canvas.add(s, false);
-        }
     }
 
     private Shape makeShape(Point p, int width, int height) {
@@ -82,7 +76,7 @@ public class UserInteractionHandler implements MouseListener, MouseMotionListene
     public void mouseReleased(MouseEvent e) {
         if(preview != null) {
             canvas.removePreview(preview);
-            preview.fixPotentialNegativeSizes();
+            //preview.fixPotentialNegativeSizes();
             canvas.add(preview, false);
 
             preview = null;
@@ -114,6 +108,26 @@ public class UserInteractionHandler implements MouseListener, MouseMotionListene
 
     @Override
     public void mouseMoved(MouseEvent e) {
+
+    }
+
+
+    /* =========== KEY LISTENER =========== */
+
+    @Override
+    public void keyTyped(KeyEvent e) {
+
+    }
+
+    @Override
+    public void keyPressed(KeyEvent e) {
+        if(Shortcuts.DELETE.matches(e)) {
+
+        }
+    }
+
+    @Override
+    public void keyReleased(KeyEvent e) {
 
     }
 }

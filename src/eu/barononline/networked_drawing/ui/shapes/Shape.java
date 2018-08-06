@@ -3,6 +3,7 @@ package eu.barononline.networked_drawing.ui.shapes;
 import org.json.JSONObject;
 
 import java.awt.*;
+import java.util.UUID;
 
 /**
  * <b>WARNING: CALL</b> {@code jsonSetup()} <b>FROM EVERY CONSTRUCTOR YOU IMPLEMENT!</b>
@@ -14,7 +15,7 @@ public abstract class Shape {
     protected Point pos;
     protected Color color;
     protected JSONObject json;
-
+    private UUID uuid;
     protected Point size;
     protected boolean filled, selected;
 
@@ -27,44 +28,27 @@ public abstract class Shape {
         color = new Color(colorObj.getInt("r"), colorObj.getInt("g"), colorObj.getInt("b"));
         size = new Point(sizeObj.getInt("width"), sizeObj.getInt("height"));
         filled = raw.getBoolean("filled");
-
-        fixPotentialNegativeSizes();
+        uuid = UUID.fromString(raw.getString("id"));
     }
 
     public Shape(Point pos, Color color, boolean filled, int width, int height) {
+        this.uuid = UUID.randomUUID();
         this.pos = pos;
         this.color = color;
         this.filled = filled;
         this.size = new Point(width, height);
-
-        fixPotentialNegativeSizes();
     }
 
     protected void jsonSetup() {
         json = new JSONObject();
 
+        json.put("id", uuid.toString());
         json.put("position", getPositionJson());
         json.put("color", getColorJson());
         json.put("size", getSizeJson());
         json.put("filled", filled);
-    }
 
-    public void fixPotentialNegativeSizes() {
-        if(size.x >= 0 && size.y >= 0)
-            return;
-
-        Point newPos = getPos();
-        if(size.x < 0) {
-            size.x = -size.x;
-            newPos.x -= size.x;
-        }
-
-        if(size.y < 0) {
-            size.y = Math.abs(size.y);
-            newPos.y -= size.y;
-        }
-
-        setPos(newPos);
+        System.out.println("UUID: " + uuid);
     }
 
     private JSONObject getPositionJson() {
@@ -105,6 +89,9 @@ public abstract class Shape {
     }
     public Point getSize() {
         return size;
+    }
+    public UUID getUuid() {
+        return uuid;
     }
 
     public void setSize(Point size) {

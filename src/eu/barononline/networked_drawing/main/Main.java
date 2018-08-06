@@ -7,6 +7,7 @@ import eu.barononline.networked_drawing.ui.DrawFrame;
 import sun.misc.Queue;
 
 import java.util.ArrayList;
+import java.util.ConcurrentModificationException;
 
 public class Main {
 
@@ -22,7 +23,7 @@ public class Main {
             if(!runnables.isEmpty()) {
                 try {
                     runnables.dequeue().run();
-                } catch (InterruptedException e) {
+                } catch (InterruptedException | ConcurrentModificationException e) {
                     e.printStackTrace();
                 }
             }

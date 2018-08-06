@@ -2,10 +2,12 @@ package eu.barononline.networked_drawing.ui;
 
 import com.sun.istack.internal.NotNull;
 import eu.barononline.network_classes.NetworkCommand;
-import eu.barononline.network_classes.interfaces.IReceiver;
 import eu.barononline.networked_drawing.networking.CommandType;
 import eu.barononline.networked_drawing.networking.Headers;
-import eu.barononline.networked_drawing.networking.IDrawReceiver;
+import eu.barononline.networked_drawing.networking.interfaces.IDeleteReceiver;
+import eu.barononline.networked_drawing.networking.interfaces.IDrawReceiver;
+import eu.barononline.networked_drawing.networking.interfaces.IRedoReceiver;
+import eu.barononline.networked_drawing.networking.interfaces.IUndoReceiver;
 import eu.barononline.networked_drawing.ui.interaction.UserInteractionHandler;
 import eu.barononline.networked_drawing.ui.shapes.Oval;
 import eu.barononline.networked_drawing.ui.shapes.Rectangle;
@@ -17,8 +19,9 @@ import sun.misc.Queue;
 import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
+import java.util.UUID;
 
-public class DrawCanvas extends JPanel implements IDrawReceiver, IReceiver<NetworkCommand<CommandType>> {
+public class DrawCanvas extends JPanel implements IDrawReceiver, IUndoReceiver, IRedoReceiver, IDeleteReceiver {
 
     private ArrayList<Shape> shapes = new ArrayList<>();
     private ArrayList<Shape> previewShapes = new ArrayList<>();
@@ -61,7 +64,7 @@ public class DrawCanvas extends JPanel implements IDrawReceiver, IReceiver<Netwo
     }
 
     public void addPreview(@NotNull Shape s) {
-        shapes.add(s);
+        previewShapes.add(s);
 
         repaint();
     }
@@ -86,6 +89,37 @@ public class DrawCanvas extends JPanel implements IDrawReceiver, IReceiver<Netwo
         repaint();
     }
 
+    public void remove(@NotNull Shape s, boolean overNetwork) {
+        shapes.remove(s);
+
+        if(!overNetwork) {
+            //TODO Send network command for deletion
+        }
+
+        repaint();
+    }
+
+    public Shape[] getSelected() {
+        ArrayList<Shape> selected = new ArrayList<>();
+
+        for(Shape s : shapes) {
+            if(s.isSelected()) {
+                selected.add(s);
+            }
+        }
+
+        return (Shape[]) selected.toArray();
+    }
+
+    private void clear(@NotNull Graphics2D g2) {
+        g2.setColor(getBackground());
+        g2.clearRect(0, 0, getWidth(), getHeight());
+    }
+
+    public UserInteractionHandler getHandler() {
+        return handler;
+    }
+
     @Override
     public void onDraw(@NotNull NetworkCommand<CommandType> cmd) {
         if(!cmd.containsHeader(Headers.DRAW_SHAPE)) {
@@ -106,30 +140,36 @@ public class DrawCanvas extends JPanel implements IDrawReceiver, IReceiver<Netwo
     }
 
     @Override
-    public void onReceive(@NotNull NetworkCommand<CommandType> sent) {
-        switch(sent.getCommandType()) {
-            case Undo:
-                Shape undone = shapes.remove(shapes.size() - 1);
-                undones.enqueue(undone);
+    public void onDelete(NetworkCommand<CommandType> cmd) {
+        JSONObject body = new JSONObject(cmd.getBody());
+        UUID deleteId = UUID.fromString(body.getString("id"));
+
+        for(Shape s : shapes) {
+            if(s.getUuid().equals(deleteId)) {
+                remove(s, true);
                 break;
-            case Redo:
-                try {
-                    shapes.add(undones.dequeue());
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-                break;
+            }
         }
 
         repaint();
     }
 
-    private void clear(@NotNull Graphics2D g2) {
-        g2.setColor(getBackground());
-        g2.clearRect(0, 0, getWidth(), getHeight());
+    @Override
+    public void onRedo(NetworkCommand<CommandType> cmd) {
+        try {
+            shapes.add(undones.dequeue());
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        repaint();
     }
 
-    public UserInteractionHandler getHandler() {
-        return handler;
+    @Override
+    public void onUndo(NetworkCommand<CommandType> cmd) {
+        Shape undone = shapes.remove(shapes.size() - 1);
+        undones.enqueue(undone);
+
+        repaint();
     }
 }

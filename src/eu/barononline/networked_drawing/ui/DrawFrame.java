@@ -33,7 +33,10 @@ public class DrawFrame extends JFrame {
     private void initComponents() {
         canvas = new DrawCanvas(this);
         conn.registerDrawReceiver(canvas);
-        conn.registerCommandReceiver(canvas);
+        conn.registerDeleteReceiver(canvas);
+        conn.registerUndoReceiver(canvas);
+        conn.registerRedoReceiver(canvas);
+        //conn.registerCommandReceiver(canvas);
         getContentPane().add(canvas, BorderLayout.CENTER);
 
 
@@ -51,6 +54,12 @@ public class DrawFrame extends JFrame {
         rectOption.setSelected(true);
         shapeGroup.add(rectOption);
         toolBar.add(rectOption);
+
+        toolBar.addSeparator();
+
+        JButton deleteButton = new JButton("Delete");
+        deleteButton.addActionListener((e) -> canvas.getHandler().onDeletePressed());
+        toolBar.add(deleteButton);
 
         //menubar.add(shapeMenu);
         getContentPane().add(toolBar, BorderLayout.NORTH);

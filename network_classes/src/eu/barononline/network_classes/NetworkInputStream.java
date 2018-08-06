@@ -73,7 +73,7 @@ public class NetworkInputStream implements IStringInputStream {
     }
 
     @Override
-    public void registerReceiver(@NotNull IReceiver<String> receiver) {
+    public void registerStringReceiver(@NotNull IReceiver<String> receiver) {
         receivers.add(receiver);
     }
 

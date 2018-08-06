@@ -10,5 +10,5 @@ public interface IStringInputStream {
     public @NotNull String readLine() throws IOException;
     public void close();
     public int available();
-    public void registerReceiver(IReceiver<String> receiver);
+    public void registerStringReceiver(IReceiver<String> receiver);
 }
