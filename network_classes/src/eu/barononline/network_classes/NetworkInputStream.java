@@ -99,12 +99,13 @@ public class NetworkInputStream implements IStringInputStream {
         @Override
         public void run() {
             boolean close = false;
-            ServerSocket server = null;
+            ServerSocket server;
             try {
                 server = new ServerSocket(port, backlog);
                 while(!close) {
                     try {
                         conn = server.accept();
+                        System.out.println("Input connected to " + conn.getInetAddress().getHostName() + ":" + conn.getPort() + "(:" + conn.getLocalPort() + ")");
                         InputStream inStream = conn.getInputStream();
 
                         StringBuilder buffer = new StringBuilder();
@@ -120,11 +121,11 @@ public class NetworkInputStream implements IStringInputStream {
                                 }
 
                                 char read = (char) inStream.read();
-                                if (read == '\u0003') { //end of text
+                                if (read == NetworkConstants.END_OF_TEXT_CHAR) {
                                     canRead = true;
                                     NetworkInputStream.this.onReceive(buffer.toString());
                                     buffer = new StringBuilder();
-                                } else if (read == '\u0004') { //end of transmission
+                                } else if (read == NetworkConstants.END_OF_TRANSMISSION_CHAR) {
                                     NetworkInputStream.this.connectionClosed = true;
                                     break;
                                 } else {

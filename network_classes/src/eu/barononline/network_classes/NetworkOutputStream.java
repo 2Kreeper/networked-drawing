@@ -5,6 +5,7 @@ import eu.barononline.network_classes.interfaces.IStringOutputStream;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.net.ConnectException;
 import java.net.Socket;
 import java.util.concurrent.ArrayBlockingQueue;
 
@@ -81,20 +82,23 @@ public class NetworkOutputStream implements IStringOutputStream {
         @Override
         public void run() {
             try {
-                conn = new Socket(host, port);
+                while(conn == null) {
+                    try {
+                        conn = new Socket(host, port);
+                    } catch (ConnectException e) {
+                    }
+                }
+                System.out.println("Output connected to " + conn.getInetAddress().getHostName() + ":" + conn.getPort() + "(:" + conn.getLocalPort() + ")");
                 OutputStream out = conn.getOutputStream();
 
                 while(true) {
                     while(outputLocked); //wait until output is unlocked
 
                     char c = ' ';
-                    while(c != '\u0003') {
+                    while(c != NetworkConstants.END_OF_TEXT_CHAR) {
                         try {
                             c = queue.poll();
                             out.write((int) c);
-                            if(c == '\u0003') {
-                                System.out.println("Finished sending!");
-                            }
                         } catch (NullPointerException e) {
                             break;
                         }
@@ -102,7 +106,7 @@ public class NetworkOutputStream implements IStringOutputStream {
                     out.flush();
 
                     if(willClose) {
-                        out.write((int) '\u0004');
+                        out.write((int) NetworkConstants.END_OF_TRANSMISSION_CHAR);
                         out.flush();
                         conn.close();
                         break;
@@ -119,7 +123,7 @@ public class NetworkOutputStream implements IStringOutputStream {
                 for (char c : s.toCharArray()) {
                     queue.put(c);
                 }
-                queue.put('\u0000');
+                queue.put(NetworkConstants.END_OF_TEXT_CHAR);
             } catch (InterruptedException e) {
             } finally {
                 outputLocked = false;

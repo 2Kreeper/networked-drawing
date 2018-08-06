@@ -14,7 +14,7 @@ public class Main {
 
     public static void main(String[] args) {
         NetworkConnection conn = new NetworkConnection(new NetworkInputStream(23128, true),
-                new NetworkOutputStream("192.168.178.40", 23128));
+                new NetworkOutputStream("localhost", 23129));
 
         DrawFrame frame = new DrawFrame("Networked Drawing", 500, 350, conn);
 

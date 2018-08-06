@@ -46,16 +46,19 @@ public class NetworkConnection implements IReceiver<String> {
         NetworkCommand<CommandType> cmd = new NetworkCommand<>(CommandType.Draw, body);
         cmd.addHeader(Headers.DRAW_SHAPE, shapeType);
 
-        System.out.println(cmd.toString());
         out.println(cmd.toString());
+        System.out.println("Sent draw for shape " + shapeType);
     }
 
     @Override
     public void onReceive(String sent) {
         try {
             NetworkCommand<CommandType> cmd = NetworkCommand.parse(sent, CommandType.class);
+            System.out.println("String received:");
+            System.out.println(sent + "\n");
 
             if (cmd.getCommandType() == CommandType.Draw) {
+                System.out.println("Received draw for shape " + cmd.getHeader(Headers.DRAW_SHAPE));
                 onDraw(cmd);
             } else {
                 for (IReceiver<NetworkCommand<CommandType>> receiver : commandReceivers) {

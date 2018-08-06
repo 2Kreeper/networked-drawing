@@ -57,6 +57,10 @@ public class DrawCanvas extends JPanel implements IDrawReceiver, IReceiver<Netwo
     public void add(Shape s, boolean overNetwork) {
         shapes.add(s);
 
+        if(overNetwork) {
+            s.setColor(Color.blue);
+        }
+
         if(!overNetwork) {
             frame.getConnection().sendDraw(s);
         }
