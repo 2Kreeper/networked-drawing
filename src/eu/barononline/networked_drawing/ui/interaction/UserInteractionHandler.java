@@ -20,6 +20,7 @@ public class UserInteractionHandler implements MouseListener, MouseMotionListene
     private String shapeType;
 
     private Shape preview;
+    private Point startPoint;
 
     public UserInteractionHandler(DrawCanvas canvas) {
         this.canvas = canvas;
@@ -70,6 +71,7 @@ public class UserInteractionHandler implements MouseListener, MouseMotionListene
                 selected.setSelected(!selected.isSelected());
             } else if (preview == null) {
                 preview = makeShape(e.getPoint(), 25, 25);
+                startPoint = e.getPoint();
                 canvas.addPreview(preview);
             }
             canvas.repaint();
@@ -80,6 +82,7 @@ public class UserInteractionHandler implements MouseListener, MouseMotionListene
     public void mouseReleased(MouseEvent e) {
         if(preview != null) {
             canvas.removePreview(preview);
+            preview.fixPotentialNegativeSizes();
             canvas.add(preview, false);
 
             preview = null;
@@ -102,7 +105,7 @@ public class UserInteractionHandler implements MouseListener, MouseMotionListene
     @Override
     public void mouseDragged(MouseEvent e) {
         if(preview != null) {
-            Point delta = new Point(e.getPoint().x - preview.getPos().x, e.getPoint().y - preview.getPos().y);
+            Point delta = new Point(Math.abs(e.getPoint().x - startPoint.x), Math.abs(e.getPoint().y - startPoint.y));
             preview.setSize(delta);
 
             SwingUtilities.invokeLater(() -> canvas.repaint());

@@ -27,6 +27,8 @@ public abstract class Shape {
         color = new Color(colorObj.getInt("r"), colorObj.getInt("g"), colorObj.getInt("b"));
         size = new Point(sizeObj.getInt("width"), sizeObj.getInt("height"));
         filled = raw.getBoolean("filled");
+
+        fixPotentialNegativeSizes();
     }
 
     public Shape(Point pos, Color color, boolean filled, int width, int height) {
@@ -34,6 +36,8 @@ public abstract class Shape {
         this.color = color;
         this.filled = filled;
         this.size = new Point(width, height);
+
+        fixPotentialNegativeSizes();
     }
 
     protected void jsonSetup() {
@@ -43,6 +47,24 @@ public abstract class Shape {
         json.put("color", getColorJson());
         json.put("size", getSizeJson());
         json.put("filled", filled);
+    }
+
+    public void fixPotentialNegativeSizes() {
+        if(size.x >= 0 && size.y >= 0)
+            return;
+
+        Point newPos = getPos();
+        if(size.x < 0) {
+            size.x = -size.x;
+            newPos.x -= size.x;
+        }
+
+        if(size.y < 0) {
+            size.y = Math.abs(size.y);
+            newPos.y -= size.y;
+        }
+
+        setPos(newPos);
     }
 
     private JSONObject getPositionJson() {
@@ -87,6 +109,7 @@ public abstract class Shape {
 
     public void setSize(Point size) {
         this.size = size;
+        //fixPotentialNegativeSizes();
         json.put("size", getSizeJson());
     }
     public void setPos(Point pos) {
