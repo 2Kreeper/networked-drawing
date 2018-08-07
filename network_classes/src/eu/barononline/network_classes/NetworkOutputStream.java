@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.net.ConnectException;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.concurrent.ArrayBlockingQueue;
 
 public class NetworkOutputStream implements IStringOutputStream {
@@ -95,14 +96,21 @@ public class NetworkOutputStream implements IStringOutputStream {
                     while(outputLocked); //wait until output is unlocked
 
                     char c = ' ';
+                    ArrayList<Byte> sendBuffer = new ArrayList<>();
                     while(c != NetworkConstants.END_OF_TEXT_CHAR) {
                         try {
                             c = queue.poll();
-                            out.write((int) c);
+                            sendBuffer.add((byte) c);
+                            //out.write((int) c);
                         } catch (NullPointerException e) {
                             break;
                         }
                     }
+                    byte[] sendArr = new byte[sendBuffer.size()];
+                    for(int i = 0; i < sendArr.length; i++) {
+                        sendArr[i] = sendBuffer.get(i);
+                    }
+                    out.write(sendArr);
                     out.flush();
 
                     if(willClose) {
