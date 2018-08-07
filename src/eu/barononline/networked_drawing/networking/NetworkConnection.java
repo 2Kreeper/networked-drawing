@@ -11,6 +11,7 @@ import eu.barononline.networked_drawing.networking.interfaces.IDrawReceiver;
 import eu.barononline.networked_drawing.networking.interfaces.IRedoReceiver;
 import eu.barononline.networked_drawing.networking.interfaces.IUndoReceiver;
 import eu.barononline.networked_drawing.ui.shapes.Shape;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 
@@ -76,6 +77,16 @@ public class NetworkConnection implements IReceiver<String> {
 
         out.println(cmd.toString());
         System.out.println("Sent draw for shape " + shapeType);
+    }
+
+    public void sendDelete(Shape shape) {
+        JSONObject body = new JSONObject();
+        body.put("id", shape.getUuid());
+
+        NetworkCommand<CommandType> cmd = new NetworkCommand<>(CommandType.Delete, body.toString());
+
+        out.println(cmd.toString());
+        System.out.println("Sent delete for shape " + shape.getShapeType());
     }
 
     @Override

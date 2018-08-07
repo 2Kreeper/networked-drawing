@@ -21,6 +21,12 @@ public enum Shortcuts {
     }
 
     public static Shortcuts valueOf(KeyEvent e) {
+        for(Shortcuts s : Shortcuts.values()) {
+            if(s.matches(e)) {
+                return s;
+            }
+        }
 
+        return null;
     }
 }

@@ -31,12 +31,11 @@ public class DrawFrame extends JFrame {
     }
 
     private void initComponents() {
-        canvas = new DrawCanvas(this);
+        canvas = new DrawCanvas(conn);
         conn.registerDrawReceiver(canvas);
         conn.registerDeleteReceiver(canvas);
         conn.registerUndoReceiver(canvas);
         conn.registerRedoReceiver(canvas);
-        //conn.registerCommandReceiver(canvas);
         getContentPane().add(canvas, BorderLayout.CENTER);
 
 
@@ -61,11 +60,6 @@ public class DrawFrame extends JFrame {
         deleteButton.addActionListener((e) -> canvas.getHandler().onDeletePressed());
         toolBar.add(deleteButton);
 
-        //menubar.add(shapeMenu);
         getContentPane().add(toolBar, BorderLayout.NORTH);
-    }
-
-    public NetworkConnection getConnection() {
-        return conn;
     }
 }

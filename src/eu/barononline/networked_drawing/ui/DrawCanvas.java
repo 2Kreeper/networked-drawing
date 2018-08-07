@@ -4,6 +4,7 @@ import com.sun.istack.internal.NotNull;
 import eu.barononline.network_classes.NetworkCommand;
 import eu.barononline.networked_drawing.networking.CommandType;
 import eu.barononline.networked_drawing.networking.Headers;
+import eu.barononline.networked_drawing.networking.NetworkConnection;
 import eu.barononline.networked_drawing.networking.interfaces.IDeleteReceiver;
 import eu.barononline.networked_drawing.networking.interfaces.IDrawReceiver;
 import eu.barononline.networked_drawing.networking.interfaces.IRedoReceiver;
@@ -27,13 +28,12 @@ public class DrawCanvas extends JPanel implements IDrawReceiver, IUndoReceiver, 
     private ArrayList<Shape> previewShapes = new ArrayList<>();
     private Queue<Shape> undones = new Queue<>();
     private UserInteractionHandler handler;
-    private DrawFrame frame;
+    private NetworkConnection conn;
 
-    public DrawCanvas(DrawFrame frame) {
+    public DrawCanvas(NetworkConnection conn) {
         super();
-        this.frame = frame;
+        this.conn = conn;
 
-        //addMouseListener(new MouseHandler());
         handler = new UserInteractionHandler(this);
     }
 
@@ -83,7 +83,7 @@ public class DrawCanvas extends JPanel implements IDrawReceiver, IUndoReceiver, 
         }
 
         if(!overNetwork) {
-            frame.getConnection().sendDraw(s);
+            conn.sendDraw(s);
         }
 
         repaint();
@@ -93,13 +93,13 @@ public class DrawCanvas extends JPanel implements IDrawReceiver, IUndoReceiver, 
         shapes.remove(s);
 
         if(!overNetwork) {
-            //TODO Send network command for deletion
+            conn.sendDelete(s);
         }
 
         repaint();
     }
 
-    public Shape[] getSelected() {
+    public Shape[] getSelectedShapes() {
         ArrayList<Shape> selected = new ArrayList<>();
 
         for(Shape s : shapes) {
@@ -108,7 +108,7 @@ public class DrawCanvas extends JPanel implements IDrawReceiver, IUndoReceiver, 
             }
         }
 
-        return (Shape[]) selected.toArray();
+        return selected.toArray(new Shape[0]);
     }
 
     private void clear(@NotNull Graphics2D g2) {

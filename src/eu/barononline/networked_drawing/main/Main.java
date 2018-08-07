@@ -6,7 +6,6 @@ import eu.barononline.networked_drawing.networking.NetworkConnection;
 import eu.barononline.networked_drawing.ui.DrawFrame;
 import sun.misc.Queue;
 
-import java.util.ArrayList;
 import java.util.ConcurrentModificationException;
 
 public class Main {

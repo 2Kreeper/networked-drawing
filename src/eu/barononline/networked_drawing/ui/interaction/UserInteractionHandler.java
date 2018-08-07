@@ -1,9 +1,11 @@
 package eu.barononline.networked_drawing.ui.interaction;
 
+import eu.barononline.networked_drawing.main.Main;
 import eu.barononline.networked_drawing.ui.DrawCanvas;
 import eu.barononline.networked_drawing.ui.shapes.Oval;
 import eu.barononline.networked_drawing.ui.shapes.Rectangle;
 import eu.barononline.networked_drawing.ui.shapes.Shape;
+import javafx.scene.input.KeyCode;
 
 import javax.swing.*;
 import java.awt.*;
@@ -12,7 +14,7 @@ import java.awt.event.*;
 import static eu.barononline.networked_drawing.ui.shapes.Shapes.OVAL;
 import static eu.barononline.networked_drawing.ui.shapes.Shapes.RECTANGLE;
 
-public class UserInteractionHandler implements MouseListener, MouseMotionListener, KeyListener {
+public class UserInteractionHandler implements MouseListener, MouseMotionListener {
 
     private DrawCanvas canvas;
     private String shapeType;
@@ -25,14 +27,26 @@ public class UserInteractionHandler implements MouseListener, MouseMotionListene
 
         canvas.addMouseListener(this);
         canvas.addMouseMotionListener(this);
+
+        canvas.getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0), "delete");
+        canvas.getActionMap().put("delete", ON_DELETE);
     }
+
+    public final Action ON_DELETE = new AbstractAction() {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            Main.runLater(() -> onDeletePressed());
+        }
+    };
 
     public void setShape(String shape) {
         this.shapeType = shape;
     }
 
     public void onDeletePressed() {
-
+        for(Shape shape : canvas.getSelectedShapes()) {
+            canvas.remove(shape, false);
+        }
     }
 
     private Shape makeShape(Point p, int width, int height) {
@@ -108,26 +122,6 @@ public class UserInteractionHandler implements MouseListener, MouseMotionListene
 
     @Override
     public void mouseMoved(MouseEvent e) {
-
-    }
-
-
-    /* =========== KEY LISTENER =========== */
-
-    @Override
-    public void keyTyped(KeyEvent e) {
-
-    }
-
-    @Override
-    public void keyPressed(KeyEvent e) {
-        if(Shortcuts.DELETE.matches(e)) {
-
-        }
-    }
-
-    @Override
-    public void keyReleased(KeyEvent e) {
 
     }
 }
