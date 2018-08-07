@@ -2,10 +2,10 @@ package eu.barononline.networked_drawing.ui.interaction;
 
 import eu.barononline.networked_drawing.main.Main;
 import eu.barononline.networked_drawing.ui.DrawCanvas;
+import eu.barononline.networked_drawing.ui.DrawFrame;
 import eu.barononline.networked_drawing.ui.shapes.Oval;
 import eu.barononline.networked_drawing.ui.shapes.Rectangle;
 import eu.barononline.networked_drawing.ui.shapes.Shape;
-import javafx.scene.input.KeyCode;
 
 import javax.swing.*;
 import java.awt.*;
@@ -14,7 +14,7 @@ import java.awt.event.*;
 import static eu.barononline.networked_drawing.ui.shapes.Shapes.OVAL;
 import static eu.barononline.networked_drawing.ui.shapes.Shapes.RECTANGLE;
 
-public class UserInteractionHandler implements MouseListener, MouseMotionListener {
+public class UserInteractionHandler implements MouseListener, MouseMotionListener, KeyEventDispatcher {
 
     private DrawCanvas canvas;
     private String shapeType;
@@ -27,9 +27,7 @@ public class UserInteractionHandler implements MouseListener, MouseMotionListene
 
         canvas.addMouseListener(this);
         canvas.addMouseMotionListener(this);
-
-        canvas.getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0), "delete");
-        canvas.getActionMap().put("delete", ON_DELETE);
+        KeyboardFocusManager.getCurrentKeyboardFocusManager().addKeyEventDispatcher(this);
     }
 
     public final Action ON_DELETE = new AbstractAction() {
@@ -123,5 +121,38 @@ public class UserInteractionHandler implements MouseListener, MouseMotionListene
     @Override
     public void mouseMoved(MouseEvent e) {
 
+    }
+
+
+    /* ======= KEY EVENT DISPATCHER ======= */
+
+    private void onKeyPressed(KeyEvent e) {
+        if(e.getKeyCode() == KeyEvent.VK_DELETE) {
+            onDeletePressed();
+        }
+    }
+
+    private int strokeCounter = 0,
+        strokeKeyCode = 0;
+    @Override
+    public boolean dispatchKeyEvent(KeyEvent e) {
+        if(e.getKeyCode() == 0) {
+            return false;
+        }
+
+        if(e.getKeyCode() == strokeKeyCode) {
+            strokeCounter++;
+
+            if(strokeCounter == 1) {
+                strokeCounter = 0;
+
+                onKeyPressed(e);
+            }
+        } else {
+            strokeKeyCode = e.getKeyCode();
+            strokeCounter = 0;
+        }
+
+        return false;
     }
 }

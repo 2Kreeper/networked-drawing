@@ -20,13 +20,15 @@ import sun.misc.Queue;
 import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
+import java.util.Stack;
 import java.util.UUID;
 
 public class DrawCanvas extends JPanel implements IDrawReceiver, IUndoReceiver, IRedoReceiver, IDeleteReceiver {
 
     private ArrayList<Shape> shapes = new ArrayList<>();
     private ArrayList<Shape> previewShapes = new ArrayList<>();
-    private Queue<Shape> undones = new Queue<>();
+    private Stack<Shape> undones = new Stack<>();
+
     private UserInteractionHandler handler;
     private NetworkConnection conn;
 
@@ -156,11 +158,7 @@ public class DrawCanvas extends JPanel implements IDrawReceiver, IUndoReceiver, 
 
     @Override
     public void onRedo(NetworkCommand<CommandType> cmd) {
-        try {
-            shapes.add(undones.dequeue());
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        shapes.add(undones.pop());
 
         repaint();
     }
@@ -168,7 +166,7 @@ public class DrawCanvas extends JPanel implements IDrawReceiver, IUndoReceiver, 
     @Override
     public void onUndo(NetworkCommand<CommandType> cmd) {
         Shape undone = shapes.remove(shapes.size() - 1);
-        undones.enqueue(undone);
+        undones.push(undone);
 
         repaint();
     }
