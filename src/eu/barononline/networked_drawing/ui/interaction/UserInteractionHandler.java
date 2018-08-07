@@ -19,6 +19,8 @@ public class UserInteractionHandler implements MouseListener, MouseMotionListene
     private DrawCanvas canvas;
     private String shapeType;
 
+    private Color drawColor = Color.BLACK;
+
     private Shape preview;
     private Point startPoint;
 
@@ -52,14 +54,22 @@ public class UserInteractionHandler implements MouseListener, MouseMotionListene
 
         switch (shapeType) {
             case OVAL:
-                s = new Oval(p, Color.BLACK, true, width, height);
+                s = new Oval(p, drawColor, true, width, height);
                 break;
             case RECTANGLE:
-                s = new Rectangle(p, Color.BLACK, true, width, height);
+                s = new Rectangle(p, drawColor, true, width, height);
                 break;
         }
 
         return s;
+    }
+
+    public Color getDrawColor() {
+        return drawColor;
+    }
+
+    public void setDrawColor(Color drawColor) {
+        this.drawColor = drawColor;
     }
 
     /* ========== MOUSE LISTENER ========== */

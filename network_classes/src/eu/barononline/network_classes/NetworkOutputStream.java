@@ -31,7 +31,7 @@ public class NetworkOutputStream implements IStringOutputStream {
 
     /**
      * Sends a String via network.
-     * Note: All '\u0003' {@link Character}s will be removed!
+     * Note: All '\u0003' and '\u0004' {@link Character}s will be removed!
      *
      * @param s The String to be sent.
      */
@@ -40,7 +40,8 @@ public class NetworkOutputStream implements IStringOutputStream {
         if(s == null) {
             return;
         }
-        s.replaceAll("\u0003", "");
+        s = s.replaceAll(NetworkConstants.END_OF_TEXT_CHAR + "", "")
+            .replaceAll(NetworkConstants.END_OF_TRANSMISSION_CHAR + "", "");
 
         thread.println(s);
     }
